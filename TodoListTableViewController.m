@@ -12,10 +12,12 @@
 
 #import <objc/runtime.h>
 static char indexPathKey;
+static NSString *todoItemsList = @"todoItemsList";
 
 @interface TodoListTableViewController ()
 
 - (IBAction)onClickAdd:(id)sender;
+- (BOOL) textFieldShouldReturn :(UITextField*) textField;
 
 @end
 
@@ -37,7 +39,7 @@ static char indexPathKey;
         
         // Initialize the array
         self.todoItemsArray = [NSMutableArray array];
-        self.todoItemsArray = [defaults objectForKey:@"todoItemsList"];
+        self.todoItemsArray = [defaults objectForKey:todoItemsList];
     }
     return self;
 }
@@ -113,6 +115,17 @@ static char indexPathKey;
     [self.tableView reloadData];
 }
 
+- (BOOL) textFieldShouldReturn :(UITextField*) textField {
+    
+    objc_getAssociatedObject(textField, &indexPathKey);
+    
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    [defaults setObject:self.todoItemsArray forKey:todoItemsList];
+    [defaults synchronize];
+    
+    return YES;
+}
+
 
 // Override to support editing the table view.
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
@@ -127,12 +140,27 @@ static char indexPathKey;
 }
 
 
-/*
+
 // Override to support rearranging the table view.
 - (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath
 {
+    // Strore object to be moved in variable
+    id originObj = [self.todoItemsArray objectAtIndex:fromIndexPath.row];
+    
+    // remove object to be moved from original location
+    [self.todoItemsArray removeObjectAtIndex:fromIndexPath.row];
+    
+    [self.todoItemsArray insertObject:originObj atIndex:toIndexPath.row];
+    
+    // Save array end state in defaults settings
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    [defaults setObject:self.todoItemsArray forKey:todoItemsList];
+    [defaults synchronize];
+
+    [self.tableView reloadData];
+    
 }
-*/
+
 
 /*
 // Override to support conditional rearranging of the table view.
