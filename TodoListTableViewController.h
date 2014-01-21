@@ -10,4 +10,6 @@
 
 @interface TodoListTableViewController : UITableViewController <UITextFieldDelegate, UITableViewDataSource>
 
+@property (nonatomic, assign) NSMutableArray *todoItemsArray;
+
 @end

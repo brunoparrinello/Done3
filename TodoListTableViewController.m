@@ -6,8 +6,12 @@
 //  Copyright (c) 2014 Bruno Parrinello. All rights reserved.
 //
 
+
 #import "TodoListTableViewController.h"
 #import "EditableCell.h"
+
+#import <objc/runtime.h>
+static char indexPathKey;
 
 @interface TodoListTableViewController ()
 
@@ -16,9 +20,6 @@
 @end
 
 @implementation TodoListTableViewController
-{
-    NSMutableArray *todoItemsArray;
-}
 
 - (id)initWithStyle:(UITableViewStyle)style
 {
@@ -28,9 +29,15 @@
         self.title = @"Done3!";
         
         NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-        [defaults setObject:@"Bruno" forKey:@"firstName"];
-        [defaults setObject:@"Parrinello" forKey:@"lastname"];
-        [defaults synchronize];
+        
+        // Test with dummy data
+        //NSMutableArray *listOfTodos = [[NSMutableArray alloc] initWithArray:@[@"Todo1", @"Todo2"]];
+        //[defaults setObject:listOfTodos forKey:@"todoItemsList"];
+        //[defaults synchronize];
+        
+        // Initialize the array
+        self.todoItemsArray = [NSMutableArray array];
+        self.todoItemsArray = [defaults objectForKey:@"todoItemsList"];
     }
     return self;
 }
@@ -44,8 +51,6 @@
 
     UINib *editableCellNib = [UINib nibWithNibName:@"EditableCell" bundle:nil];
     [self.tableView registerNib:editableCellNib forCellReuseIdentifier:@"EditableCell"];
-    
-    todoItemsArray = [[NSMutableArray alloc] initWithCapacity:0];
  
     // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
     self.navigationItem.leftBarButtonItem = self.editButtonItem;
@@ -64,16 +69,12 @@
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-#warning Potentially incomplete method implementation.
-    // Return the number of sections.
     return 1;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-#warning Incomplete method implementation.
-    // Return the number of rows in the section.
-    return 1;
+    return [self.todoItemsArray count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -81,9 +82,9 @@
     static NSString *CellIdentifier = @"EditableCell";
     EditableCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
     
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    cell.todoItemTextField.text = [defaults objectForKey:@"firstName"];
-    // Configure the cell...
+    cell.todoItemTextField.text = [self.todoItemsArray objectAtIndex:indexPath.row];
+    
+     objc_setAssociatedObject(cell.todoItemTextField, &indexPathKey, indexPath, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     
     return cell;
 }
@@ -101,6 +102,15 @@
 - (IBAction)onClickAdd:(id)sender {
     NSLog(@"Button Add has been clicked");
     
+
+    static NSString *CellIdentifier = @"EditableCell";
+    NSIndexPath *indexPath = 0;
+    EditableCell *cell = [self.tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
+    
+    [self.todoItemsArray insertObject:cell.todoItemTextField.text atIndex:indexPath.row];
+    objc_setAssociatedObject(cell.todoItemTextField, &indexPathKey, indexPath, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    
+    [self.tableView reloadData];
 }
 
 
