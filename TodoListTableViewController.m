@@ -17,7 +17,8 @@ static NSString *todoItemsList = @"todoItemsList";
 @interface TodoListTableViewController ()
 
 - (IBAction)onClickAdd:(id)sender;
-- (BOOL) textFieldShouldReturn :(UITextField*) textField;
+- (BOOL) textFieldShouldReturn:(UITextField*) textField;
+- (void) saveListInDefaults:(id) todoList withKey:(NSString *)key;
 
 @end
 
@@ -131,9 +132,13 @@ static NSString *todoItemsList = @"todoItemsList";
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
+        
+        [self.todoItemsArray removeObjectAtIndex:indexPath.row];
+        
         // Delete the row from the data source
         [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
-    }   
+        [self saveListInDefaults:self.todoItemsArray withKey:todoItemsList];
+    }
     else if (editingStyle == UITableViewCellEditingStyleInsert) {
         // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
     }   
@@ -153,12 +158,18 @@ static NSString *todoItemsList = @"todoItemsList";
     [self.todoItemsArray insertObject:originObj atIndex:toIndexPath.row];
     
     // Save array end state in defaults settings
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    [defaults setObject:self.todoItemsArray forKey:todoItemsList];
-    [defaults synchronize];
+    [self saveListInDefaults:self.todoItemsArray withKey:todoItemsList];
 
     [self.tableView reloadData];
     
+}
+
+// Manage saving data into User Defaults
+- (void) saveListInDefaults:(id)todoList withKey:(NSString *)key {
+    
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    [defaults setObject:todoList forKey:key];
+    [defaults synchronize];
 }
 
 
