@@ -13,13 +13,19 @@
                 <rect key="frame" x="0.0" y="0.0" width="320" height="43"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" minimumFontSize="17" clearButtonMode="whileEditing" translatesAutoresizingMaskIntoConstraints="NO" id="ehQ-AT-Jn8">
+                    <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" minimumFontSize="17" clearButtonMode="whileEditing" translatesAutoresizingMaskIntoConstraints="NO" id="ehQ-AT-Jn8">
                         <rect key="frame" x="20" y="7" width="280" height="30"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                         <textInputTraits key="textInputTraits"/>
                     </textField>
                 </subviews>
+                <constraints>
+                    <constraint firstItem="ehQ-AT-Jn8" firstAttribute="top" secondItem="4gO-04-4Ra" secondAttribute="top" constant="7" id="71c-jK-b04"/>
+                    <constraint firstAttribute="trailing" secondItem="ehQ-AT-Jn8" secondAttribute="trailing" constant="20" symbolic="YES" id="N3b-Nk-VdF"/>
+                    <constraint firstAttribute="bottom" secondItem="ehQ-AT-Jn8" secondAttribute="bottom" constant="6" id="TsD-QX-4Cz"/>
+                    <constraint firstItem="ehQ-AT-Jn8" firstAttribute="leading" secondItem="4gO-04-4Ra" secondAttribute="leading" constant="20" symbolic="YES" id="bFa-4C-PZy"/>
+                </constraints>
             </tableViewCellContentView>
             <connections>
                 <outlet property="todoItemTextField" destination="ehQ-AT-Jn8" id="ose-eL-Ssy"/>
