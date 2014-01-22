@@ -19,6 +19,7 @@ static NSString *todoItemsList = @"todoItemsList";
 - (IBAction)onClickAdd:(id)sender;
 - (BOOL) textFieldShouldReturn:(UITextField*) textField;
 - (void) saveListInDefaults:(id) todoList withKey:(NSString *)key;
+- (IBAction)onTap:(id)sender;
 
 @end
 
@@ -82,12 +83,23 @@ static NSString *todoItemsList = @"todoItemsList";
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
+   // Reuse cell or create one if none available.
     static NSString *CellIdentifier = @"EditableCell";
     EditableCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
+    if (cell == nil) {
+        cell = [[EditableCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
+    }
     
     cell.todoItemTextField.text = [self.todoItemsArray objectAtIndex:indexPath.row];
     
-     objc_setAssociatedObject(cell.todoItemTextField, &indexPathKey, indexPath, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(cell.todoItemTextField, &indexPathKey, indexPath, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    
+    cell.todoItemTextField.delegate = self;
+    
+    // Disable editing of cells when not in editing mode
+    //[cell.todoItemTextField setUserInteractionEnabled:NO];
+    
+     NSLog(@"cellForRowAtIndexPath - content is: %@", cell.todoItemTextField.text);
     
     return cell;
 }
@@ -104,25 +116,44 @@ static NSString *todoItemsList = @"todoItemsList";
 // Action when button + or Add is clicked on.
 - (IBAction)onClickAdd:(id)sender {
     NSLog(@"Button Add has been clicked");
-    
-
+/*
     static NSString *CellIdentifier = @"EditableCell";
     NSIndexPath *indexPath = 0;
     EditableCell *cell = [self.tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
     
     [self.todoItemsArray insertObject:cell.todoItemTextField.text atIndex:indexPath.row];
     objc_setAssociatedObject(cell.todoItemTextField, &indexPathKey, indexPath, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    
+  
+*/
+    [self.todoItemsArray insertObject:@"" atIndex:0];
     [self.tableView reloadData];
+    NSIndexPath *currPlace = [NSIndexPath indexPathForRow:0 inSection:0] ;
+    [self tableView:self.tableView didSelectRowAtIndexPath:currPlace];
+    
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+        EditableCell *cell = (EditableCell *)[self.tableView cellForRowAtIndexPath:indexPath];
+        [cell.todoItemTextField setUserInteractionEnabled:YES];
+        [cell.todoItemTextField becomeFirstResponder];
+
 }
 
 - (BOOL) textFieldShouldReturn :(UITextField*) textField {
     
-    objc_getAssociatedObject(textField, &indexPathKey);
+    NSLog(@"textFieldShouldReturn");
+    if (textField.text.length <= 0) {
+        // Text is empty, nothing is added - removing empty object from array before it gets saved
+        [self.todoItemsArray removeObjectAtIndex:0];
+    } else {
+        NSIndexPath *indexPath = objc_getAssociatedObject(textField, &indexPathKey);
+        self.todoItemsArray[indexPath.row] = textField.text;
+        
+        [self saveListInDefaults:self.todoItemsArray withKey:todoItemsList];
     
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    [defaults setObject:self.todoItemsArray forKey:todoItemsList];
-    [defaults synchronize];
+    }
+        [self.tableView reloadData];
     
     return YES;
 }
@@ -162,6 +193,12 @@ static NSString *todoItemsList = @"todoItemsList";
 
     [self.tableView reloadData];
     
+}
+
+- (IBAction)onTap:(id)sender {
+    NSLog(@"onTap");
+    [self.view endEditing:YES];
+    [self saveListInDefaults:self.todoItemsArray withKey:todoItemsList];
 }
 
 // Manage saving data into User Defaults
